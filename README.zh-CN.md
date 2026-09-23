@@ -142,6 +142,10 @@ sequenceDiagram
 
 桥接只接受当前 Web 进程的正常启动授权 URL，不从浏览器提取 Cookie。`accepted` 不是完成；`worker_finished` 表示 DSH 记录了回合结束，调用方仍要检查产物。桥接返回真实 `sessionId` 和 Web 根地址，目前不编造指定会话的深链接。独立运行的 `dsh-mcp` / headless 任务不等同于当前 Web 页面中的实时任务。
 
+## Codex 发给 GrokApp 的实现
+
+GrokApp 的[本机会话接口](https://github.com/RongleCat/grok-app/blob/main/docs/llm-wiki/session-api.md)允许查询已有 App 会话，并通过 `POST /v1/sessions/{id}/turns` 把提示词续发到同一会话。用户在 GrokApp 中打开该会话查看工作。接口不提供新建会话或完整结果读取，所以接收方会话须先由用户在 App 中建立；`turn_started` / `queued` 是送达状态，完成结果需从 App 会话或已核对的本机日志取得。实现与限制见 [GrokApp 桥接说明](references/grok-app.md)。
+
 ## 适配器最小接口
 
 ```text

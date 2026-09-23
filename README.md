@@ -1,26 +1,46 @@
 # Agent Call
 
-[中文图解](README.zh-CN.md)
+[中文](#中文) · [English](#english) · [中文详细图解](README.zh-CN.md)
 
-A small Codex skill for sending a bounded prompt from one agent task to another, user-visible agent task. The user can open the recipient task to follow its visible work. It is independent of model names, subscriptions, and provider APIs.
+## 中文
 
-## What is included
+Agent Call 是一个 Codex Skill 基座：调用方把提示词送入接收方**独立、可由用户打开的会话**，记录真实会话 ID，随后读取状态和结果。它不绑定特定模型或订阅方案。
 
-- [`SKILL.md`](SKILL.md): instructions used when calling another agent.
-- [`references/protocol.md`](references/protocol.md): message fields, delivery semantics, and an example exchange.
-- [`references/antigravity.md`](references/antigravity.md): a concrete bridge for creating or messaging an Antigravity Desktop conversation.
-- [`references/dsh-web.md`](references/dsh-web.md): a DSH Web bridge that creates a native visible session, sends a prompt, and collects its result.
+```mermaid
+flowchart LR
+    U["用户"] --> C["调用方 Agent"]
+    C -->|"提示词 + requestId"| B["原生任务工具 / 应用适配器"]
+    B --> R["接收方可见会话"]
+    U -.->|"打开会话看过程"| R
+    R -->|"状态、回复、产物"| B
+    B --> C
+    C -->|"验收结论"| U
+```
 
-The skill uses a task messaging tool or adapter already available to the host. The recipient must have a real task reference that the user can open. A background-only worker does not provide this experience. If no supported route is available, the skill can prepare a handoff message but must say that delivery has not occurred.
+**包含内容**
 
-## Basic use
+- [`SKILL.md`](SKILL.md)：调用、跟踪与验收规则。
+- [通信协议](references/protocol.md)：请求标识、送达回执、终态与异常处理。
+- [Antigravity Desktop](references/antigravity.md)：由 Sidecar 调用 `agentapi` 创建或更新原生会话。
+- [DSH Web](references/dsh-web.md)：通过当前 Web Host 创建会话、发送消息并收集回复。
+- [GrokApp](references/grok-app.md)：向用户已创建的 App 会话续发消息；结果读取的边界见说明。
+- [中文详细图解](README.zh-CN.md)：完整流程图与消息示例。
 
-Place the `agent-call` folder in a Codex skills directory, then ask Codex to use `$agent-call` for a specific task and recipient. For example:
+将此文件夹放入 Codex 的 Skills 目录后，可以要求 Codex 使用 `$agent-call` 给指定接收方任务发送一项明确工作。工具返回 `accepted` 只表示受理；是否完成以及产物是否合格，需要继续核对。接收方会话中的可见消息与工具活动由其宿主应用展示，不包括私有内部推理。
 
-> Use `$agent-call` to send the parser review prompt to my review task. Give me its task link so I can watch its work, then report its findings and what you verified.
+## English
 
-The caller sends the prompt to the recipient task, exposes that task's real view reference to the user, follows its status, and checks the final result against the original task. The recipient's task shows its own visible messages, tool activity, and output; it does not expose private internal reasoning.
+Agent Call is a Codex skill base for sending a bounded prompt to a **separate recipient session that the user can open**. It records the real session ID, follows the task, and verifies the result. It does not depend on a particular model or subscription.
 
-## Scope
+The diagram above shows the flow: the caller sends a prompt and `requestId` through a native task tool or adapter; the user opens the recipient session; the caller reads its status and output, then checks the result.
 
-This is a coordination base, not a universal agent runtime. A complete adapter must implement task messaging, a user-openable task reference, status, and result collection. The Antigravity example implements conversation creation and messaging; an optional Stop hook captures terminal status and the final visible reply. The DSH Web example uses the native Web Host's session API. Codex-side live tool progress and visual confirmation in the user's open browser still need independent verification. A manual handoff remains pending until an agent actually receives it.
+**Included**
+
+- [`SKILL.md`](SKILL.md): dispatch, follow-up, and verification rules.
+- [Protocol](references/protocol.md): request IDs, receipts, terminal states, and uncertain delivery.
+- [Antigravity Desktop](references/antigravity.md): Sidecar and `agentapi` native conversations.
+- [DSH Web](references/dsh-web.md): native Web sessions with prompt and result collection.
+- [GrokApp](references/grok-app.md): continuation of an existing App session, with documented result limits.
+- [Detailed Chinese guide](README.zh-CN.md): diagrams and message examples.
+
+Place this folder in a Codex skills directory and ask Codex to use `$agent-call` for a specific task and recipient. An `accepted` receipt confirms admission, not completion. Verify the recipient's output and artifacts before reporting success. The recipient app controls what visible progress it displays; private internal reasoning is outside this interface.
