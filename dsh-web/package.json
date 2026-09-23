@@ -1,0 +1,7 @@
+{
+  "name": "agent-call-dsh-web",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "dependencies": { "ws": "8.21.0" }
+}

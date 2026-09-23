@@ -1,0 +1,11 @@
+{
+  "agent-call": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python3 '/absolute/path/to/agent-call/antigravity-sidecar/hook.py'",
+        "timeout": 10
+      }
+    ]
+  }
+}

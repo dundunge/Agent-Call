@@ -1,0 +1,7 @@
+{
+  "description": "Local bridge for creating or messaging Antigravity conversations",
+  "display_name": "Agent Call",
+  "command": "python3",
+  "args": ["bridge.py", "serve"],
+  "restart_policy": "on-failure"
+}

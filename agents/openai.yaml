@@ -1,0 +1,3 @@
+interface:
+  display_name: "Agent Call"
+  short_description: "Send work to a visible agent task and follow it"
