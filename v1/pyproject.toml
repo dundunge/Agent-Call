@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aiteam-control-plane"
+version = "0.1.0"
+description = "An evidence-preserving control plane for provider-native agent sessions"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependencies = []
+
+[project.scripts]
+aiteam = "agent_team_v1.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["agent_team_v1"]
+
+[tool.uv]
+package = true

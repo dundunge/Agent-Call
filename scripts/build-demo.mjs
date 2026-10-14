@@ -1,0 +1,12 @@
+import { cp, mkdir, readFile, rm } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+const root = fileURLToPath(new URL('../', import.meta.url));
+const source = path.join(root, 'v1/agent_team_v1/web');
+const output = path.join(root, 'dist');
+const html = await readFile(path.join(source, 'index.html'), 'utf8');
+if (!html.includes('simulation.js') || !html.includes('vendor/dsh-design-platform.css')) throw new Error('Incomplete demo source');
+await rm(output, { recursive: true, force: true });
+await mkdir(output, { recursive: true });
+await cp(source, output, { recursive: true });
+console.log('Static demo built at dist/. No backend, credentials, or local state included.');

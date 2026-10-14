@@ -2,6 +2,22 @@
 
 [中文](#中文) · [English](#english) · [中文详细图解](README.zh-CN.md)
 
+## AI Team V1 · 可交互作品集
+
+[公开演示](https://dundunge.github.io/Agent-Call/) · [启动与体验](v1/README.zh-CN.md) · [架构分工](v1/ARCHITECTURE.md) · [路线与验收](v1/ROADMAP.md)
+
+DSH 式多 Agent 会话工作台：GPT 主控派发 DeepSeek、Grok 和 GPT 一级线程，各组继续派发同组二级线程。可切换独立会话、查看团队拓扑、逐步运行、暂停继续、模拟送达超时、回收产物并记录最终验收。
+
+公开网页使用确定性模拟脚本，不调用模型或本机 Agent。原有 Agent Call 原生会话桥继续作为真实接入的基座。UI 复用 DSH 的 MIT 主题，保留[来源声明](THIRD_PARTY_NOTICES.md)。
+
+```zsh
+uv sync --project v1 --python 3.12
+./scripts/start-v1.sh
+# 打开 http://127.0.0.1:8766/
+```
+
+The [interactive AI Team demo](https://dundunge.github.io/Agent-Call/) shows three-level collaboration, independent thread views, replayable events, delivery reconciliation, and evidence-gated acceptance. It runs entirely from scripted browser fixtures. See the [V1 guide](v1/README.md).
+
 ## 中文
 
 Agent Call 是一个 Codex Skill 基座：调用方把提示词送入接收方**独立、可由用户打开的会话**，记录真实会话 ID，随后读取状态和结果。它不绑定特定模型或订阅方案。

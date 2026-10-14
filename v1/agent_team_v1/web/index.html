@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="AI Team：可交互的多模型协作演示。GPT 主控、DeepSeek 与 Grok 一级线程，以及同组模型二级派发。">
+  <title>AI Team · 多 Agent 工作台</title>
+  <link rel="stylesheet" href="vendor/dsh-base.css">
+  <link rel="stylesheet" href="vendor/dsh-design-platform.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="simulation.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <svg class="svg-defs" aria-hidden="true"><defs>
+    <symbol id="i-sidebar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 1-8 8H5l-3 3V11a9 9 0 0 1 18 0Z"/><path d="M7 10h9M7 14h5"/></symbol>
+    <symbol id="i-tree" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M5 17v-5h14v5"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 6-6 6 6 6m8-12 6 6-6 6M14 3l-4 18"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-11v1"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 11a9 9 0 1 1 3 8M3 4v7h7"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M12 20V4m-6 6 6-6 6 6"/></symbol>
+  </defs></svg>
+
+  <div class="frame" id="app-frame">
+    <aside class="sidebar" aria-label="会话与线程">
+      <div class="brand-row">
+        <a class="brand" href="#" aria-label="AI Team 主控"><span class="brand-mark">ai<span>↗</span></span><span class="brand-name">AI Team<small>V1</small></span></a>
+        <button class="icon-button" id="sidebar-collapse" aria-label="收起会话侧栏" title="收起会话侧栏"><svg><use href="#i-sidebar"/></svg></button>
+      </div>
+      <button class="new-session" id="new-run"><svg><use href="#i-plus"/></svg><span>新建演示任务</span></button>
+      <nav class="panel-nav" aria-label="工作台">
+        <button class="nav-button active" data-view="chat"><svg><use href="#i-chat"/></svg><span>会话工作台</span></button>
+        <button class="nav-button" data-view="topology"><svg><use href="#i-tree"/></svg><span>团队拓扑</span><span class="nav-hint">3 层</span></button>
+      </nav>
+      <div class="sidebar-section"><span>项目</span><span class="mono">/ portfolio</span></div>
+      <button class="project-row" id="select-project"><span>⌄</span><span class="folder-icon">▱</span><strong>AI Team 演示</strong><span class="mini-badge">公开</span></button>
+      <div class="task-row"><span class="task-dot"></span><span id="sidebar-title">多模型协作 · 项目研究</span></div>
+      <div class="tree-heading"><span>Agent 线程</span><span id="thread-counter">1 / 7</span></div>
+      <div id="thread-tree" class="thread-tree" role="tree" aria-label="Agent 层级线程树"></div>
+      <div class="sidebar-bottom">
+        <div class="legend"><span><i class="dot running"></i>运行</span><span><i class="dot completed"></i>完成</span><span><i class="dot waiting"></i>等待</span></div>
+        <button class="nav-button" id="about-button"><svg><use href="#i-info"/></svg><span>项目与架构</span></button>
+        <a class="nav-button" href="https://github.com/dundunge/Agent-Call" target="_blank" rel="noopener"><svg><use href="#i-code"/></svg><span>开源仓库</span><span class="nav-hint">↗</span></a>
+        <div class="sandbox-status"><span class="dot completed"></span>浏览器内模拟 <span class="mono">MOCK</span></div>
+      </div>
+    </aside>
+
+    <main class="conversation">
+      <header class="conversation-header">
+        <div class="title-row">
+          <button class="icon-button sidebar-expand" id="sidebar-expand" aria-label="展开会话侧栏"><svg><use href="#i-sidebar"/></svg></button>
+          <div id="breadcrumbs" class="breadcrumbs"></div>
+          <div class="header-actions"><span class="demo-pill">公开演示</span><button class="icon-button" id="theme-toggle" aria-label="切换明暗主题" title="切换明暗主题"><svg><use href="#i-sun"/></svg></button><button class="icon-button" id="details-toggle" aria-label="打开线程详情" title="线程详情"><svg><use href="#i-sidebar"/></svg></button></div>
+        </div>
+        <div class="session-tabs" role="tablist" aria-label="会话视图">
+          <button class="session-tab active" data-view="chat" role="tab" aria-selected="true">对话</button>
+          <button class="session-tab" data-view="topology" role="tab" aria-selected="false">团队拓扑</button>
+          <button class="session-tab" data-view="events" role="tab" aria-selected="false">事件 <span id="event-counter">0</span></button>
+          <button class="session-tab" data-view="artifacts" role="tab" aria-selected="false">产物</button>
+        </div>
+      </header>
+
+      <section class="run-bar" aria-label="模拟运行控制">
+        <div class="run-state"><i id="run-dot" class="dot waiting"></i><strong id="run-status">准备就绪</strong><span class="mono" id="run-progress">0 / 24</span></div>
+        <div class="run-controls"><button class="icon-button" id="reset-run" aria-label="重置当前模拟" title="重置"><svg><use href="#i-reset"/></svg></button><button class="button subtle" id="step-run">单步</button><button class="button primary" id="play-run">▶ 运行演示</button></div>
+      </section>
+      <div class="progress-track"><span id="progress-fill"></span></div>
+      <div class="view-content" id="view-content" tabindex="-1"></div>
+
+      <section class="composer-dock">
+        <div id="run-notice" class="run-notice" hidden></div>
+        <div class="composer-card">
+          <label class="sr-only" for="prompt-input">演示任务目标</label>
+          <textarea id="prompt-input" rows="2" maxlength="1200" placeholder="给主控 GPT 一个目标，查看它如何派发 DeepSeek、Grok 与同组子线程…">研究 AI Team 的 V1 方案，比较实现路线，给出可验证的项目成果。</textarea>
+          <div class="composer-toolbar">
+            <div class="composer-settings"><span class="model-control"><i class="provider-icon gpt">G</i>GPT-6.1-Sol</span><label class="sr-only" for="scenario-select">演示场景</label><select id="scenario-select"><option value="success">正常回收</option><option value="unknown">送达超时</option></select><label class="sr-only" for="speed-select">播放速度</label><select id="speed-select"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></div>
+            <button class="send-button" id="send-prompt" aria-label="发送目标并开始模拟" title="发送 · ⌘ Enter"><svg><use href="#i-arrow"/></svg></button>
+          </div>
+        </div>
+        <p class="demo-note">预设脚本模拟 · 模型名称为演示配置 · 不调用 API、不连接本机 Agent</p>
+      </section>
+    </main>
+
+    <aside class="rightbar" id="rightbar" aria-label="线程详情">
+      <div class="rightbar-header"><strong>检查器</strong><button class="icon-button" id="rightbar-close" aria-label="关闭线程详情">×</button></div>
+      <div class="inspector-tabs" role="tablist" aria-label="检查器视图"><button class="active" data-inspector="task" role="tab" aria-selected="true">任务</button><button data-inspector="protocol" role="tab" aria-selected="false">协议</button><button data-inspector="architecture" role="tab" aria-selected="false">架构</button></div>
+      <div id="inspector-content" class="inspector-content"></div>
+    </aside>
+  </div>
+  <div class="sidebar-shade" id="sidebar-shade"></div>
+  <dialog id="accept-dialog"><form method="dialog"><div class="dialog-head"><h2>主控最终验收</h2><button class="icon-button" value="cancel" aria-label="关闭验收">×</button></div><p>全部线程完成后，由主控核对模拟证据。三个条件齐全，才记录通过。</p><div id="accept-checks"></div><div class="dialog-actions"><button class="button subtle" value="cancel">返回检查</button><button class="button primary" id="confirm-accept" type="button" disabled>记录验收通过</button></div></form></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript><p>请启用 JavaScript 以使用层级线程模拟。</p></noscript>
+</body>
+</html>
